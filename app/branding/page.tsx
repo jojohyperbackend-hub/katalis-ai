@@ -1,151 +1,150 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function BrandingPage() {
-  const searchParams = useSearchParams();
-  const latestId = searchParams.get("latest");
-
-  const [catalogItems, setCatalogItems] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [style, setStyle] = useState("");
   const [brief, setBrief] = useState("");
+  const [output, setOutput] = useState("");
 
-  // Ambil 1 data katalog berdasarkan ?latest=
-  const fetchCatalog = async () => {
-    try {
-      if (!latestId) {
+  // ===============================
+  // Fetch semua dokumen branding
+  // ===============================
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const { data, error } = await supabase
+          .from("katal_docs")
+          .select("*")
+          .eq("doc_type", "branding")
+          .order("created_at", { ascending: false });
+
+        if (error) console.log("SUPABASE ERROR:", error);
+
+        console.log("DATA SUPABASE:", data);
+        setHistory(data || []);
+      } finally {
         setLoading(false);
+      }
+    }
+    loadHistory();
+  }, []);
+
+  // ===============================
+  // Generate branding Gemini API
+  // ===============================
+  async function generateBranding() {
+    if (!brief) return alert("Isi brief dulu");
+
+    setOutput("Loading...");
+
+    try {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent",
+        {
+          method: "POST",
+          headers: {
+            "x-goog-api-key": process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Buat branding lengkap untuk UMKM.\nStyle: ${style}\nBrief: ${brief}\nSertakan: voice, tone, tagline, CTA, warna, persona, style visual.`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        setOutput(`Error Gemini API: ${errText}`);
         return;
       }
 
-      const res = await fetch(`/api/catalog?id=${latestId}`); 
       const data = await res.json();
-
-      // data bisa array atau object → normalisasi ke array
-      setCatalogItems(Array.isArray(data) ? data : [data]);
+      const text = data?.results?.[0]?.content?.[0]?.text || "Tidak ada output.";
+      setOutput(text);
     } catch (err) {
-      console.log("Error fetching catalog:", err);
+      console.error(err);
+      setOutput("Error saat generate branding.");
     }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchCatalog();
-  }, [latestId]);
-
-  // Trigger AI branding generator
-  const generateBranding = async () => {
-    if (!style || !brief) {
-      alert("Isi semua bidang terlebih dahulu");
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/branding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          style,
-          brief,
-          catalog: catalogItems,
-        }),
-      });
-
-      const result = await res.json();
-      console.log("BRANDING RESULT:", result);
-
-      // TODO: tampilkan hasilnya
-    } catch (e) {
-      console.log("Error generate branding:", e);
-    }
-  };
+  }
 
   return (
-    <main className="min-h-screen w-full bg-gray-50 px-6 py-20 flex flex-col items-center">
-      <div className="w-full max-w-4xl">
+    <div className="p-8 space-y-6">
+      <h1 className="text-3xl font-bold">Branding Generator</h1>
 
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-semibold tracking-tight">Branding Assistant</h1>
-          <Link
-            href="/dashboard"
-            className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm hover:bg-gray-800 transition"
-          >
-            Dashboard
-          </Link>
-        </div>
-
-        {/* BRANDING FORM */}
-        <section className="p-6 bg-white rounded-2xl shadow-sm border mb-12 space-y-6">
-          <h2 className="text-xl font-semibold">Generate Branding Dengan AI</h2>
-
-          {/* STYLE INPUT */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              Gaya Branding Yang Diinginkan
-            </label>
-            <input
-              placeholder="Contoh: Minimalis, Futuristik, Elegant, Retro, dsb..."
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              className="p-3 rounded-xl border focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-          </div>
-
-          {/* BRIEF INPUT */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">
-              Deskripsi Singkat (Brief)
-            </label>
-            <textarea
-              placeholder="Tulis deskripsi brand kamu..."
-              value={brief}
-              onChange={(e) => setBrief(e.target.value)}
-              rows={5}
-              className="p-3 rounded-xl border focus:ring-2 focus:ring-blue-500 outline-none"
-            ></textarea>
-          </div>
-
-          {/* GENERATE BUTTON */}
-          <button
-            onClick={generateBranding}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium tracking-wide hover:bg-blue-700 transition"
-          >
-            Generate Branding
-          </button>
-        </section>
-
-        {/* CATALOG SECTION */}
-        <section className="p-6 bg-white rounded-2xl shadow-sm border">
-          <h2 className="text-xl font-semibold mb-4">
-            Data Katalog (Sebagai Referensi Branding)
-          </h2>
-
-          {loading ? (
-            <p className="text-gray-500">Loading katalog…</p>
-          ) : (
-            <div className="space-y-3">
-              {catalogItems.length < 1 && (
-                <p className="text-gray-400 text-sm">Tidak ada data katalog.</p>
-              )}
-
-              {catalogItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 border rounded-xl bg-gray-50"
-                >
-                  <p className="font-medium">{item.product_name}</p>
-                  <p className="text-sm text-gray-500">{item.product_details}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
+      {/* FORM INPUT */}
+      <div className="space-y-4">
+        <input
+          className="border p-3 w-full rounded-xl"
+          placeholder="Gaya Brand (Modern, Elegan...)"
+          value={style}
+          onChange={(e) => setStyle(e.target.value)}
+        />
+        <textarea
+          className="border p-3 w-full rounded-xl"
+          placeholder="Deskripsi / Brief Brand"
+          value={brief}
+          onChange={(e) => setBrief(e.target.value)}
+        />
+        <button
+          onClick={generateBranding}
+          className="px-4 py-2 bg-black text-white rounded-xl"
+        >
+          Generate Branding
+        </button>
       </div>
-    </main>
+
+      {/* OUTPUT */}
+      {output && (
+        <div className="border p-4 rounded-lg bg-gray-50 whitespace-pre-wrap">
+          {output}
+        </div>
+      )}
+
+      {/* RIWAYAT BRANDING */}
+      <div>
+        <h2 className="text-2xl font-semibold mt-6">Riwayat Dasar Branding (Supabase)</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : history.length === 0 ? (
+          <p className="text-gray-500">Belum ada riwayat.</p>
+        ) : (
+          <div className="space-y-4 mt-4">
+            {history.map((doc) => (
+              <div
+                key={doc.id}
+                className="border p-4 rounded-lg bg-white cursor-pointer hover:bg-gray-50"
+                onClick={() => {
+                  setStyle(doc.style || "");
+                  setBrief(doc.content || "");
+                  setOutput(""); // reset output
+                }}
+              >
+                <p className="font-bold">{doc.title || "Tanpa Judul"}</p>
+                <p className="text-sm text-gray-500">{doc.style}</p>
+                <p className="mt-2 whitespace-pre-wrap">{doc.content}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
