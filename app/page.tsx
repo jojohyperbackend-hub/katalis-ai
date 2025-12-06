@@ -7,13 +7,13 @@ export default function HomePage() {
 
   const contributors = [
     {
-      name: "Mr.foxy(jong)",
+      name: "Mr.foxy (jong)",
       role: "Leader • Fullstack Dev • Brainstorming",
       symbol: "🦊"
     },
     {
-      name: "farid sanz",
-      role: "Brainstorming • Quality Control",
+      name: "RiddSanz (Parid)",
+      role: "Brainstorming • Quality Control • UI/UX",
       symbol: "👨‍💻"
     },
     {
