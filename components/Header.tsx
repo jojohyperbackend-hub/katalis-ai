@@ -1,13 +1,40 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { HiMenu, HiX } from "react-icons/hi";
+import { useState, useEffect } from "react";
+
+type Theme = "light" | "dark" | "retro";
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>("light");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Sync theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") as Theme | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
+    }
+  }, []);
+
+  const applyTheme = (mode: Theme) => {
+    document.documentElement.classList.remove("light", "dark", "retro");
+    document.documentElement.classList.add(mode);
+  };
+
+  const toggleTheme = () => {
+    let nextTheme: Theme;
+    if (theme === "light") nextTheme = "dark";
+    else if (theme === "dark") nextTheme = "retro";
+    else nextTheme = "light";
+
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+  };
 
   const smoothScroll = (id: string) => {
     const el = document.getElementById(id);
@@ -16,96 +43,101 @@ export default function Header() {
   };
 
   const handleScroll = (id: string) => {
+    setMobileMenuOpen(false);
     if (pathname === "/") {
       smoothScroll(id);
-      setOpen(false);
       return;
     }
     router.push(`/#${id}`);
-    setOpen(false);
+  };
+
+  const handleNavigation = (path: string) => {
+    setMobileMenuOpen(false);
+    router.push(path);
+  };
+
+  // Theme icon based on current theme
+  const renderThemeIcon = () => {
+    if (theme === "light") return "☀️";
+    if (theme === "dark") return "🌙";
+    if (theme === "retro") return "🕹️";
   };
 
   return (
-    <header className="w-full bg-white fixed top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        {/* Logo */}
+    <>
+      <header className="w-full py-4 px-6 flex items-center justify-between shadow-sm fixed top-0 z-50 transition-colors">
         <h1
-          className="text-lg sm:text-xl font-bold cursor-pointer"
-          onClick={() => router.push("/")}
+          className="text-xl font-bold cursor-pointer"
+          onClick={() => handleNavigation("/")}
         >
           KatalisAi
         </h1>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <button onClick={() => handleScroll("hero")}>Hero</button>
+          <button onClick={() => handleScroll("description")}>Features</button>
+          <button onClick={() => handleScroll("contributors")}>Contributors</button>
           <button
-            onClick={() => handleScroll("hero")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            Hero
-          </button>
-          <button
-            onClick={() => handleScroll("description")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            My Fitur
-          </button>
-          <button
-            onClick={() => handleScroll("contributors")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            Contributors
-          </button>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded text-sm sm:text-base hover:bg-blue-700 transition"
+            onClick={() => handleNavigation("/dashboard")}
+            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Dashboard
           </button>
+
+          <button
+            onClick={toggleTheme}
+            className="ml-2 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {renderThemeIcon()}
+          </button>
         </nav>
 
-        {/* Mobile Hamburger */}
-        <div className="md:hidden flex items-center">
+        {/* Mobile Menu & Theme Toggle */}
+        <div className="flex md:hidden items-center gap-3">
           <button
-            onClick={() => setOpen(!open)}
-            className="text-gray-800 focus:outline-none"
+            onClick={toggleTheme}
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
           >
-            {open ? <HiX size={24} /> : <HiMenu size={24} />}
+            {renderThemeIcon()}
+          </button>
+
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? "✖️" : "☰"}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-64 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+      >
+        <div className="flex flex-col p-6 space-y-6 mt-16">
+          <button onClick={() => handleScroll("hero")}>Hero</button>
+          <button onClick={() => handleScroll("description")}>Features</button>
+          <button onClick={() => handleScroll("contributors")}>Contributors</button>
+          <button
+            onClick={() => handleNavigation("/dashboard")}
+            className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Dashboard
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden bg-white shadow-lg border-t border-gray-200 animate-slide-down">
-          <div className="flex flex-col gap-2 px-4 py-4">
-            <button
-              onClick={() => handleScroll("hero")}
-              className="text-base hover:text-blue-600 text-left w-full"
-            >
-              Hero
-            </button>
-            <button
-              onClick={() => handleScroll("description")}
-              className="text-base hover:text-blue-600 text-left w-full"
-            >
-              My Fitur
-            </button>
-            <button
-              onClick={() => handleScroll("contributors")}
-              className="text-base hover:text-blue-600 text-left w-full"
-            >
-              Contributors
-            </button>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="px-3 py-2 bg-blue-600 text-white rounded text-base hover:bg-blue-700 transition w-full text-center"
-            >
-              Dashboard
-            </button>
-          </div>
-        </div>
-      )}
-    </header>
+    </>
   );
 }

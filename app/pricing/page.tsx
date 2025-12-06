@@ -11,13 +11,13 @@ const supabase = createClient(
 export default function PricingPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [brief, setBrief] = useState("");
   const [output, setOutput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmNext, setConfirmNext] = useState(false);
 
   // ================================
-  // Fetch semua data dari branding_results
+  // Load semua data dari branding_results
   // ================================
   useEffect(() => {
     async function loadHistory() {
@@ -38,16 +38,35 @@ export default function PricingPage() {
   }, []);
 
   // ================================
-  // Generate Pricing AI (RAG + Vector)
+  // Strict context check → otomatis dari Riwayat Branding
+  // ================================
+  function isValidBrief(text: string) {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    // cek apakah brief mengandung kata dari Riwayat Branding
+    const validWords = history.map((h) => h.result.toLowerCase());
+    const match = validWords.some((w) => lowerText.includes(w.slice(0, 15))); // cek sebagian kata supaya matching
+    return match || history.length === 0; // kalau riwayat kosong biarkan
+  }
+
+  // ================================
+  // Generate Pricing AI
   // ================================
   async function generatePricing() {
     if (!brief) return alert("Isi strategi / brief dulu");
+
+    if (!isValidBrief(brief)) {
+      alert("Hey yang bener aja! Prompt di luar konteks tidak diperbolehkan.");
+      return;
+    }
+
     if (!process.env.NEXT_PUBLIC_OPENROUTER_API_KEY) {
       setOutput("Error: OpenRouter API Key tidak ditemukan");
       return;
     }
 
     setOutput("Loading...");
+    setConfirmNext(false);
 
     try {
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -61,11 +80,12 @@ export default function PricingPage() {
           messages: [
             {
               role: "system",
-              content: "Kamu adalah AI Pricing & Strategi Modal profesional dengan sistem RAG + vector database. Format output agar seperti chat bubble modern, rapi, elegant, mudah dibaca, tanpa simbol *, #, atau ---."
+              content:
+                "Kamu adalah AI Pricing & Strategi Keuangan profesional. Fokus pada rencana modal, pengeluaran, dan strategi keuangan. Output harus dalam tabel rapi untuk modal dan pengeluaran, sisanya tetap chat bubble. Bersihkan semua simbol *, #, atau ---."
             },
-            { role: "user", content: `Strategi / Brief: ${brief}` },
-          ],
-        }),
+            { role: "user", content: `Strategi / Brief: ${brief}` }
+          ]
+        })
       });
 
       if (!res.ok) {
@@ -77,10 +97,10 @@ export default function PricingPage() {
       const json = await res.json();
       let text = json?.choices?.[0]?.message?.content || "No output";
 
-      // Bersihkan simbol yang tidak diinginkan
       text = text.replace(/[*#\-]{1,}/g, "").trim();
 
       setOutput(text);
+      setConfirmNext(true); // tampilkan opsi Iya / Tidak
     } catch (err: any) {
       console.log("OpenRouter API ERROR:", err);
       setOutput(`OpenRouter API ERROR: ${err.message || err}`);
@@ -96,7 +116,7 @@ export default function PricingPage() {
   }
 
   // ================================
-  // Save ke tabel pricing_results manual
+  // Save output ke tabel pricing_results
   // ================================
   async function saveOutput() {
     if (!output) return alert("Belum ada output untuk disimpan");
@@ -107,8 +127,8 @@ export default function PricingPage() {
         {
           brief,
           result: output,
-          created_at: new Date(),
-        },
+          created_at: new Date()
+        }
       ]);
 
       if (error) {
@@ -125,7 +145,7 @@ export default function PricingPage() {
   }
 
   // ================================
-  // Delete history item
+  // Hapus riwayat branding
   // ================================
   async function deleteHistoryItem(id: number) {
     if (!confirm("Hapus riwayat ini?")) return;
@@ -148,31 +168,70 @@ export default function PricingPage() {
   }
 
   // ================================
-  // Fungsi untuk formatting output ala ChatGPT 5
+  // Clear chat
+  // ================================
+  function clearChat() {
+    setOutput("");
+    setConfirmNext(false);
+  }
+
+  // ================================
+  // Render output → pisahkan tabel vs teks
   // ================================
   const renderOutput = (text: string) => {
     const lines = text.split("\n").filter(Boolean);
-    return lines.map((line, idx) => (
-      <div
-        key={idx}
-        className="self-start bg-gradient-to-br from-white via-gray-50 to-gray-100 text-gray-900 p-4 rounded-xl rounded-tl-none max-w-full sm:max-w-xl shadow-lg whitespace-pre-wrap break-words"
-      >
-        {line}
-      </div>
-    ));
+    const outputElements = [];
+    let tableBlock: string[] = [];
+
+    lines.forEach((line) => {
+      if (line.includes("|") || line.toLowerCase().includes("tabel")) {
+        tableBlock.push(line);
+      } else {
+        if (tableBlock.length > 0) {
+          outputElements.push(
+            <pre
+              key={outputElements.length}
+              className="self-start bg-gray-100 text-gray-900 p-4 rounded-xl rounded-tl-none max-w-full sm:max-w-xl shadow-lg font-mono whitespace-pre-wrap"
+            >
+              {tableBlock.join("\n")}
+            </pre>
+          );
+          tableBlock = [];
+        }
+        outputElements.push(
+          <div
+            key={outputElements.length}
+            className="self-start bg-gradient-to-br from-white via-gray-50 to-gray-100 text-gray-900 p-4 rounded-xl rounded-tl-none max-w-full sm:max-w-xl shadow-lg whitespace-pre-wrap break-words font-mono"
+          >
+            {line}
+          </div>
+        );
+      }
+    });
+
+    if (tableBlock.length > 0) {
+      outputElements.push(
+        <pre
+          key={outputElements.length}
+          className="self-start bg-gray-100 text-gray-900 p-4 rounded-xl rounded-tl-none max-w-full sm:max-w-xl shadow-lg font-mono whitespace-pre-wrap"
+        >
+          {tableBlock.join("\n")}
+        </pre>
+      );
+    }
+
+    return outputElements;
   };
 
   return (
     <div className="p-6 sm:p-8 md:p-10 space-y-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-        Pricing & Strategi Modal
-      </h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Pricing & Strategi Keuangan</h1>
 
       {/* FORM INPUT */}
       <div className="space-y-4">
         <textarea
-          className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 placeholder-gray-400"
-          placeholder="Masukkan strategi / brief pasar"
+          className="border p-3 w-full rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 placeholder-gray-400 font-mono"
+          placeholder="Masukkan strategi / brief keuangan"
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
         />
@@ -192,19 +251,44 @@ export default function PricingPage() {
           >
             {saving ? "Saving..." : "Save Output"}
           </button>
+
+          <button
+            onClick={clearChat}
+            className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition"
+          >
+            Clear Chat
+          </button>
         </div>
       </div>
 
-      {/* OUTPUT AI Bubble */}
+      {/* OUTPUT AI */}
       {output && (
         <div className="mt-6 flex flex-col gap-3">
           {renderOutput(output)}
+
+          {/* Konfirmasi Iya / Tidak */}
+          {confirmNext && (
+            <div className="flex gap-4 mt-4">
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                onClick={() => alert("Lanjutkan proses selanjutnya")}
+              >
+                Iya
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                onClick={() => alert("Proses dihentikan, tetap di output saat ini")}
+              >
+                Tidak
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* RIWAYAT */}
       <div className="mt-10">
-        <h2 className="text-2xl font-semibold mb-4">Riwayat Branding / Strategi Pasar</h2>
+        <h2 className="text-2xl font-semibold mb-4">Riwayat Branding / Strategi Keuangan</h2>
         {loading ? (
           <p>Loading...</p>
         ) : history.length === 0 ? (
@@ -219,7 +303,7 @@ export default function PricingPage() {
                 <div onClick={() => handleHistoryClick(doc)} className="flex-1">
                   <p className="font-bold">{doc.style || "Tanpa Style"}</p>
                   <p className="text-sm text-gray-500">{new Date(doc.created_at).toLocaleString()}</p>
-                  <p className="mt-2 whitespace-pre-wrap">{doc.result}</p>
+                  <p className="mt-2 whitespace-pre-wrap font-mono">{doc.result}</p>
                 </div>
                 <button
                   onClick={() => deleteHistoryItem(doc.id)}
