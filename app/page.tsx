@@ -12,7 +12,7 @@ export default function HomePage() {
       symbol: "🦊"
     },
     {
-      name: "farid sanz",
+      name: "farid",
       role: "Brainstorming • Quality Control",
       symbol: "👨‍💻"
     },

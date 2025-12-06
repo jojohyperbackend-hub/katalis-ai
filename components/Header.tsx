@@ -26,54 +26,58 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-white fixed top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        {/* Logo */}
-        <h1
-          className="text-lg sm:text-xl font-bold cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          KatalisAi
-        </h1>
+    <>
+      {/* HEADER FIXED */}
+      <header className="w-full bg-white fixed top-0 z-50 shadow-sm h-16 flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full">
+          {/* Logo */}
+          <h1
+            className="text-lg sm:text-xl font-bold cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            KatalisAi
+          </h1>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          <button
-            onClick={() => handleScroll("hero")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            Hero
-          </button>
-          <button
-            onClick={() => handleScroll("description")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            feature
-          </button>
-          <button
-            onClick={() => handleScroll("contributors")}
-            className="text-sm sm:text-base hover:text-blue-600"
-          >
-            Contributors
-          </button>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded text-sm sm:text-base hover:bg-blue-700 transition"
-          >
-            Dashboard
-          </button>
-        </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => handleScroll("hero")}
+              className="text-sm sm:text-base hover:text-blue-600"
+            >
+              Hero
+            </button>
+            <button
+              onClick={() => handleScroll("description")}
+              className="text-sm sm:text-base hover:text-blue-600"
+            >
+              Feature
+            </button>
+            <button
+              onClick={() => handleScroll("contributors")}
+              className="text-sm sm:text-base hover:text-blue-600"
+            >
+              Contributors
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded text-sm sm:text-base hover:bg-blue-700 transition"
+            >
+              Dashboard
+            </button>
+          </nav>
 
-        {/* Mobile Hamburger */}
-        <div className="md:hidden flex items-center">
+          {/* Mobile Hamburger */}
           <button
             onClick={() => setOpen(!open)}
-            className="text-gray-800 focus:outline-none"
+            className="md:hidden text-gray-800 focus:outline-none"
           >
             {open ? <HiX size={24} /> : <HiMenu size={24} />}
           </button>
         </div>
-      </div>
+      </header>
+
+      {/* SPACER AGAR KONTEN TIDAK KETUTUP HEADER */}
+      <div className="h-16" />
 
       {/* Mobile Menu */}
       {open && (
@@ -89,7 +93,7 @@ export default function Header() {
               onClick={() => handleScroll("description")}
               className="text-base hover:text-blue-600 text-left w-full"
             >
-               Fitur
+              Fitur
             </button>
             <button
               onClick={() => handleScroll("contributors")}
@@ -106,6 +110,6 @@ export default function Header() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

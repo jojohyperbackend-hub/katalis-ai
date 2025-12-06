@@ -10,7 +10,7 @@ Fitur utama:
 - Menampilkan riwayat branding terbaru
 - Interface sederhana dan responsif
 
-> ⚠️ Catatan: Karena keterbatasan API, jika quota Gemini habis, AI generate mungkin tidak berjalan.
+> ⚠️ Catatan: web apikasi harus wajib pake open router ai model chat gpt 4o jadi di sarankan pake api key open router
 
 ---
 
@@ -93,7 +93,7 @@ Proyek ini open-source, lisensi MIT.
 
 -Glen => brainstroming
 
--Farid => Brainstorming, Quality Control dan sepuh scroll fesnuk
+-Farid => Brainstorming, Quality Control
 
 Terima kasih sudah melihat proyek kami. Semoga tahun depan CAT Lovers bisa berkontribusi lebih maksimal di hackathon berikutnya!
 
