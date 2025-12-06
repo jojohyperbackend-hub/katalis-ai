@@ -10,6 +10,7 @@ export default function CatalogPage() {
   const [productName, setProductName] = useState("");
   const [productDetails, setProductDetails] = useState("");
   const [brandStyle, setBrandStyle] = useState("santai");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!productName || !productDetails) {
@@ -17,31 +18,40 @@ export default function CatalogPage() {
       return;
     }
 
-    const { data, error } = await supabaseBrowser
-      .from("katal_docs")
-      .insert(
-        {
-          doc_type: "catalog",
-          title: productName,
-          content: productDetails,
-          style: brandStyle,
-        },
-        { returning: "representation" }
-      );
+    setSaving(true);
 
-    if (error) {
-      console.error("Supabase error:", error);
-      alert("Gagal menyimpan data.");
-      return;
+    try {
+      const { data, error } = await supabaseBrowser
+        .from("katal_docs")
+        .insert([
+          {
+            doc_type: "catalog",
+            title: productName,
+            content: productDetails,
+            style: brandStyle,
+          }
+        ])
+        .select(); // gunakan select() untuk mendapat data setelah insert
+
+      if (error) {
+        console.error("Supabase error:", error);
+        alert("Gagal menyimpan data.");
+        return;
+      }
+
+      const newId = data?.[0]?.id;
+      if (!newId) {
+        router.push("/dashboard");
+        return;
+      }
+
+      router.push(`/branding?latest=${newId}`);
+    } catch (err: any) {
+      console.error("Error saat menyimpan:", err);
+      alert("Terjadi error saat menyimpan data.");
+    } finally {
+      setSaving(false);
     }
-
-    const newId = data?.[0]?.id;
-    if (!newId) {
-      router.push("/dashboard");
-      return;
-    }
-
-    router.push(`/branding?latest=${newId}`);
   };
 
   return (
@@ -81,9 +91,10 @@ export default function CatalogPage() {
 
       <button
         onClick={handleSave}
-        className="w-full px-4 py-2 rounded-md bg-blue-600 text-white"
+        className={`w-full px-4 py-2 rounded-md text-white ${saving ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+        disabled={saving}
       >
-        Simpan ke Supabase
+        {saving ? "Menyimpan..." : "Simpan ke Supabase"}
       </button>
     </div>
   );
