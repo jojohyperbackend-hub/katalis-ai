@@ -134,7 +134,7 @@ export default function BrandingPage() {
       if (error) {
         alert("Gagal menyimpan: " + error.message);
       } else {
-        alert("Berhasil menyimpan ke branding_results");
+        alert("Berhasil menyimpan ya yatta");
       }
     } catch (err: any) {
       console.log("SAVE ERROR:", err);
