@@ -73,6 +73,7 @@ export default function CatalogPage() {
           value={brandStyle}
           onChange={(e) => setBrandStyle(e.target.value)}
         >
+          <option value="minimalis">Minimalis</option>
           <option value="santai">Santai</option>
           <option value="formal">Formal</option>
           <option value="ceria">Ceria</option>

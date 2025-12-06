@@ -30,7 +30,6 @@ export default function BrandingPage() {
 
         if (error) console.log("SUPABASE ERROR:", error);
 
-        console.log("DATA SUPABASE:", data);
         setHistory(data || []);
       } finally {
         setLoading(false);
@@ -40,44 +39,53 @@ export default function BrandingPage() {
   }, []);
 
   // ===============================
-  // Generate branding Gemini API
+  // Generate branding OpenRouter AI
   // ===============================
   async function generateBranding() {
     if (!brief) return alert("Isi brief dulu");
 
-    setOutput("Loading...");
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    if (!apiKey) {
+      alert("API Key OpenRouter (NEXT_PUBLIC_OPENROUTER_API_KEY) belum disetting di environment (.env)");
+      return;
+    }
+
+    setOutput("Loading AI (GPT-4o-mini)...");
 
     try {
-      const res = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent",
-        {
-          method: "POST",
-          headers: {
-            "x-goog-api-key": process.env.NEXT_PUBLIC_GEMINI_API_KEY!,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `Buat branding lengkap untuk UMKM.\nStyle: ${style}\nBrief: ${brief}\nSertakan: voice, tone, tagline, CTA, warna, persona, style visual.`,
-                  },
-                ],
-              },
-            ],
-          }),
-        }
-      );
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": "http://localhost:3000",
+          "X-Title": "KatalisAi",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert branding consultant for SMEs (UMKM). Respond in Bahasa Indonesia with professional formatting."
+            },
+            {
+              role: "user",
+              content: `Buat branding lengkap untuk UMKM.\nStyle: ${style}\nBrief: ${brief}\nSertakan: voice, tone, tagline, CTA, warna, persona, style visual. Format output rapi.`
+            }
+          ],
+          temperature: 0.7,
+        }),
+      });
 
       if (!res.ok) {
         const errText = await res.text();
-        setOutput(`Error Gemini API: ${errText}`);
+        console.error("OpenRouter API Error:", errText);
+        setOutput(`Error: ${res.status} ${res.statusText}.`);
         return;
       }
 
       const data = await res.json();
-      const text = data?.results?.[0]?.content?.[0]?.text || "Tidak ada output.";
+      const text = data?.choices?.[0]?.message?.content || "Tidak ada output dari AI.";
       setOutput(text);
     } catch (err) {
       console.error(err);
