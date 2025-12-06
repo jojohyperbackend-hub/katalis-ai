@@ -26,7 +26,6 @@ export default function Header() {
   };
 
   return (
-<<<<<<< HEAD
     <>
       {/* HEADER FIXED */}
       <header className="w-full bg-white fixed top-0 z-50 shadow-sm h-16 flex items-center">
@@ -38,17 +37,6 @@ export default function Header() {
           >
             KatalisAi
           </h1>
-=======
-    <header className="w-full bg-white fixed top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 bottom-5">
-        {/* Logo */}
-        <h1
-          className="text-lg sm:text-xl font-bold cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          KatalisAi
-        </h1>
->>>>>>> ea5f079206a77f30bdf09e439832a88e0bd1b6c2
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
