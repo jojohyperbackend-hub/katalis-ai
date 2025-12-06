@@ -8,17 +8,17 @@ export default function HomePage() {
   const contributors = [
     {
       name: "Mr.foxy(jong)",
-      role: "Leader • Full Stack Dev • Brainstroming",
+      role: "Leader • Fullstack Dev • Brainstorming",
       symbol: "🦊"
     },
     {
-      name: "Farid",
-      role: "Brainstroming • Front End",
+      name: "RiddSanz",
+      role: "Brainstorming • Quality Control",
       symbol: "👨‍💻"
     },
     {
-      name: "Glen",
-      role: "Brainstroming • Rancangan Awal",
+      name: "Glenn",
+      role: "Brainstorming • Rancangan Awal",
       symbol: "🧠"
     }
   ];
@@ -36,7 +36,7 @@ export default function HomePage() {
         </h1>
 
         <p className="max-w-2xl text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed">
-          Solusi AI tercepat untuk UMKM membuat katalog produk profesional  
+          Solusi AI tercepat untuk UMKM membuat katalog produk profesional
           <span className="font-semibold text-gray-800"> tanpa ribet, langsung sat set.</span>
         </p>
 
