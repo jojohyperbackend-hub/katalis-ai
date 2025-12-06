@@ -80,27 +80,27 @@ export default function ExportPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">Export Data (PNG / JPG)</h1>
+    <div className="p-6 max-w-3xl mx-auto space-y-6 mt-20">
+      <h1 className="text-2xl font-bold dark:text-white">Export Data (PNG / JPG)</h1>
 
       {/* Buttons */}
       <div className="flex gap-4">
         <button
           onClick={() => exportImage("png")}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
           Export PNG
         </button>
 
         <button
           onClick={() => exportImage("jpg")}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg"
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
         >
           Export JPG
         </button>
       </div>
 
-      {loading && <p className="text-sm opacity-70">Menggenerate gambar…</p>}
+      {loading && <p className="text-sm opacity-70 dark:text-gray-400">Menggenerate gambar…</p>}
     </div>
   );
 }

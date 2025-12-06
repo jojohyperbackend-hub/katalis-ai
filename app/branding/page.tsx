@@ -86,26 +86,26 @@ export default function BrandingPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-bold">Branding Generator</h1>
+    <div className="p-8 space-y-6 mt-20">
+      <h1 className="text-3xl font-bold dark:text-white">Branding Generator</h1>
 
       {/* FORM INPUT */}
       <div className="space-y-4">
         <input
-          className="border p-3 w-full rounded-xl"
+          className="border border-gray-300 dark:border-gray-700 p-3 w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           placeholder="Gaya Brand (Modern, Elegan...)"
           value={style}
           onChange={(e) => setStyle(e.target.value)}
         />
         <textarea
-          className="border p-3 w-full rounded-xl"
+          className="border border-gray-300 dark:border-gray-700 p-3 w-full rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors min-h-[100px]"
           placeholder="Deskripsi / Brief Brand"
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
         />
         <button
           onClick={generateBranding}
-          className="px-4 py-2 bg-black text-white rounded-xl"
+          className="px-4 py-2 bg-black dark:bg-blue-600 text-white rounded-xl hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors"
         >
           Generate Branding
         </button>
@@ -113,33 +113,33 @@ export default function BrandingPage() {
 
       {/* OUTPUT */}
       {output && (
-        <div className="border p-4 rounded-lg bg-gray-50 whitespace-pre-wrap">
+        <div className="border dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
           {output}
         </div>
       )}
 
       {/* RIWAYAT BRANDING */}
       <div>
-        <h2 className="text-2xl font-semibold mt-6">Riwayat Dasar Branding (Supabase)</h2>
+        <h2 className="text-2xl font-semibold mt-6 dark:text-white">Riwayat Dasar Branding</h2>
         {loading ? (
           <p>Loading...</p>
         ) : history.length === 0 ? (
-          <p className="text-gray-500">Belum ada riwayat.</p>
+          <p className="text-gray-500 dark:text-gray-400">Belum ada riwayat.</p>
         ) : (
           <div className="space-y-4 mt-4">
             {history.map((doc) => (
               <div
                 key={doc.id}
-                className="border p-4 rounded-lg bg-white cursor-pointer hover:bg-gray-50"
+                className="border dark:border-gray-700 p-4 rounded-lg bg-white dark:bg-gray-900 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => {
                   setStyle(doc.style || "");
                   setBrief(doc.content || "");
                   setOutput(""); // reset output
                 }}
               >
-                <p className="font-bold">{doc.title || "Tanpa Judul"}</p>
-                <p className="text-sm text-gray-500">{doc.style}</p>
-                <p className="mt-2 whitespace-pre-wrap">{doc.content}</p>
+                <p className="font-bold dark:text-white">{doc.title || "Tanpa Judul"}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{doc.style}</p>
+                <p className="mt-2 whitespace-pre-wrap dark:text-gray-300">{doc.content}</p>
               </div>
             ))}
           </div>

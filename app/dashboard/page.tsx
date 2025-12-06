@@ -56,15 +56,15 @@ export default function DashboardPage() {
   // ============================================================
   if (!user) {
     return (
-      <main className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center px-6 py-16">
+      <main className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 flex flex-col items-center justify-center px-6 py-16 transition-colors">
 
         {/* CARD */}
-        <div className="bg-white shadow-xl border rounded-3xl p-10 w-full max-w-md text-center space-y-10 backdrop-blur-sm">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-800">
+        <div className="bg-white dark:bg-gray-900 shadow-xl border dark:border-gray-800 rounded-3xl p-10 w-full max-w-md text-center space-y-10 backdrop-blur-sm transition-colors">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-800 dark:text-white">
             Welcome Back
           </h1>
 
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
             Masuk untuk melanjutkan ke dashboard & mengelola katalog kamu
           </p>
 
@@ -86,14 +86,14 @@ export default function DashboardPage() {
             {/* ANONYMOUS LOGIN */}
             <button
               onClick={loginAnon}
-              className="w-full py-3 rounded-xl border text-gray-700 font-medium tracking-wide text-sm hover:bg-gray-100 transition"
+              className="w-full py-3 rounded-xl border dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium tracking-wide text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             >
               Login Anonymous
             </button>
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 mt-6">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">
           Powered by Firebase Authentication
         </p>
       </main>
@@ -104,18 +104,18 @@ export default function DashboardPage() {
   //  DASHBOARD (SETELAH LOGIN)
   // ============================================================
   return (
-    <main className="min-h-screen w-full bg-gray-50 flex flex-col items-center px-6 py-16">
+    <main className="min-h-screen w-full bg-gray-50 dark:bg-gray-950 flex flex-col items-center px-6 py-16 transition-colors">
       {/* HEADER + PROFILE */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-semibold tracking-tight dark:text-white">Dashboard</h1>
 
         <div className="flex items-center gap-4">
 
           <div className="text-right">
-            <p className="font-medium">
+            <p className="font-medium dark:text-white">
               {user.displayName || "Anonymous User"}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {user.providerData[0]?.providerId}
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
           {/* Avatar */}
           <img
             src={user.photoURL || "https://ui-avatars.com/api/?name=Anon"}
-            className="w-10 h-10 rounded-full border"
+            className="w-10 h-10 rounded-full border dark:border-gray-700"
           />
 
           {/* Logout */}
@@ -147,48 +147,48 @@ export default function DashboardPage() {
       <section className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           href="/catalog"
-          className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition group"
+          className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-800 hover:shadow-md transition-all group"
         >
-          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
+          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white">
             Catalog
           </h2>
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
             Kelola, lihat, dan buat item katalog baru dengan cepat.
           </p>
         </Link>
 
         <Link
           href="/branding"
-          className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition group"
+          className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-800 hover:shadow-md transition-all group"
         >
-          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
+          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white">
             Branding
           </h2>
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
             Atur aset brand, warna, logo, dan elemen visual lainnya.
           </p>
         </Link>
 
         <Link
           href="/pricing"
-          className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition group"
+          className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-800 hover:shadow-md transition-all group"
         >
-          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
+          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white">
             Pricing
           </h2>
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
             Buat struktur harga dan kelola paket pricing.
           </p>
         </Link>
 
         <Link
           href="/export"
-          className="p-6 bg-white rounded-2xl shadow-sm border hover:shadow-md transition group"
+          className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border dark:border-gray-800 hover:shadow-md transition-all group"
         >
-          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600">
+          <h2 className="text-xl font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white">
             Export Catalog
           </h2>
-          <p className="text-gray-600 text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
             Export katalog ke format PDF, JSON, atau integrasi API.
           </p>
         </Link>
